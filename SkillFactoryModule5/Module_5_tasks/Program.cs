@@ -4,132 +4,149 @@ namespace Module_5_Tasks
 {
     class Program
     {
-        
+
         public static void Main(string[] args)
+        //Тестовое задание к Модулю 5. Курс Профессия С# Разработчик
+        //Немного украсил консоль, чтобы было не скучно, хотя этого небыло в задании не судите строго))
         {
-            var user = GetUser();
-            ShowUserInfo(user.Name, user.LastName, user.Age, user.IsPet, user.PetNames, user.Colors);
+            WriteInColor("ПРЕДУПРЕЖДЕНИЕ! ", false, 12);
+            WriteInColor("Вводите данные корректно\n", true, 15);
+            WriteInColor("Анкета пользователя", true, 14);
+            ShowUserInfo(GetUser());
+            Console.ResetColor();
+            Console.Write("\nНажмите любую клавишу для выхода из программы:");
             Console.ReadKey();
         }
-        static void ShowUserInfo(string Name, string LastName, int Age, bool IsPet, string[] PetNames, string[] Colors)
+
+        static void WriteInColor(string text, bool method, int color)
+        //метод выводит сообщение в консоль в заданном цвете и заданным методом
+        //если числовое значение превышает допустимое в перечислении вывод в консоль - серым цветом
         {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Информация по пользователю");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Ваше имя: {0}", Name);
-            Console.WriteLine("Ваше фамиля: {0}", LastName);
-            Console.WriteLine("Ваш возраст: {0}", Age);
-            
-            if (IsPet) 
+            if (color <= 15) { Console.ForegroundColor = (ConsoleColor)color; }
+            else { Console.ForegroundColor = (ConsoleColor)7; }
+            if (method) { Console.WriteLine(text); }
+            else { Console.Write(text); }
+        }
+        static void ShowUserInfo((string Name, string LastName, int Age, bool IsPet, string[] Petnames, string[] favColors) User)
+        //Метод выводит информацию указаную пользователем в анкете
+        {
+            WriteInColor("\nРезультат анкетирования пользователя", true, 14);
+            WriteInColor("Ваше имя: ", false, 10);
+            WriteInColor(User.Name, true, 15);
+            WriteInColor("Ваша фамилия: ", false, 10);
+            WriteInColor(User.LastName, true, 15);
+            WriteInColor("Ваш возраст: ", false, 10);
+            WriteInColor(Convert.ToString(User.Age), true, 15);
+
+            if (User.IsPet)
             {
-                Console.WriteLine("Ваши питомцы:");
-                foreach (string PetName in PetNames)
+                WriteInColor("Ваши питомцы:", true, 10);
+                foreach (string petname in User.Petnames)
                 {
-                    Console.WriteLine(PetName);
+                    WriteInColor(petname, true, 11);
                 }
             }
             else
             {
-                Console.WriteLine("Ваши питомцы: {0}", PetNames[0]);
+                WriteInColor("Ваши питомцы: ", false, 10);
+                WriteInColor(User.Petnames[0], true, 15);
             }
-            Console.WriteLine("Ваши любимые цвета:");
-            foreach (string color in Colors)
+
+            WriteInColor("Ваши любимые цвета:", true, 10);
+            foreach (string color in User.favColors)
             {
-                Console.WriteLine(color);
+                WriteInColor(color, true, 13);
             }
-            Console.ResetColor();
-            Console.WriteLine("\nНажмите любую клавишу для выхода из программы:");
         }
-        static (string Name, string LastName, int Age, bool IsPet, string[] PetNames, string[] Colors) GetUser()
+        static (string Name, string LastName, int Age, bool IsPet, string[] PetNames, string[] favColors) GetUser()
+        // метод возвращает кортеж с анкетными даннымим пользователя
         {
-                       
+            (string Name, string LastName, int Age, bool IsPet, string[] PetNames, string[] favColors) User;
+
+            User.Name = TextQuestion("Введите Ваше имя: ");
+            User.LastName = TextQuestion("Введите Вашу фамилию: ");
+            User.Age = NumQuestion("Введите Ваш возраст цифрами (полных лет): ");
+
             string consdata;
-            int num;
-            string text;
-           
+            bool petset = false;
             do
             {
-                Console.WriteLine("Введите Ваше имя:");
-                consdata = Console.ReadLine();
-            } while (ChekUserText(consdata, out text) == false);
-            string name = text;
-
-            do
-            {
-                Console.WriteLine("Введите Вашу фамилию:");
-                consdata = Console.ReadLine();
-            } while (ChekUserText(consdata, out text) == false);
-            string lastname = text;
-
-            do
-            {
-                Console.WriteLine("Введите Ваш возраст:");
-                consdata = Console.ReadLine();
-            } while (ChekForNumeric(consdata, out num) == false);
-            int age = num;
-
-            bool ispet=false;
-            bool petset=false;
-            string[] petnames;
-            do
-            {
-                Console.WriteLine("У Вас есть питомец (Введите Да/Нет)?:");
-                consdata = Console.ReadLine();
+                WriteInColor("У Вас есть питомец (Введите Да/Нет)?: ", false, 15);
+                Console.ForegroundColor = ConsoleColor.Gray;
+                var input = Console.ReadLine();
+                consdata = string.IsNullOrWhiteSpace(input) ? string.Empty : input;
                 switch (consdata)
                 {
                     case "Да":
-                        do
-                        {
-                            Console.WriteLine("Введите количество питомцев цифрами:");
-                            consdata = Console.ReadLine();
-                        } while (ChekForNumeric(consdata, out num) == false);
-                        petnames = FillArray(num, "Введите кличку {0} питомца:");
-                        ispet = true;
+                        User.PetNames = FillArray(NumQuestion("Введите количество питомцев цифрами: "), "Введите кличку питомца № ");
+                        User.IsPet = true;
                         petset = true;
                         break;
                     case "Нет":
-                        petnames = ["Нет питомцев"];
+                        User.IsPet = false;
+                        User.PetNames = ["Нет питомцев"];
                         petset = true;
                         break;
                     default:
-                        petnames = ["Нет питомцев"];
+                        User.IsPet = false;
+                        User.PetNames = ["Нет питомцев"];
                         continue;
                 }
             } while (petset == false);
- 
 
+            User.favColors = FillArray(NumQuestion("Введите количество Ваших любимых цветов цифрами: "), "Введите любимый цвет № ");
+
+            return (User);
+        }
+        static string TextQuestion(string msgtext)
+        //метод запрашивает у пользователя строчные данные, вызывает методы проверки и возвращает корректное значение
+        {
+            string consstring;
+            string corrstring;
             do
             {
-                Console.WriteLine("Введите количество Ваших любимых цветов:");
-                consdata = Console.ReadLine();
-            } while (ChekForNumeric(consdata, out num) == false);
-            string[] colors = FillArray(num, "Введите {0} любимый цвет:");
+                WriteInColor(msgtext, false, 15);
+                Console.ForegroundColor = ConsoleColor.Gray;
+                var input = Console.ReadLine();
+                consstring = string.IsNullOrWhiteSpace(input) ? string.Empty : input;
+            } while (ChekUserText(consstring, out corrstring) == false);
+            return corrstring;
+        }
 
-            return (name, lastname, age, ispet, petnames, colors);
+        static int NumQuestion(string msgtext)
+        //метод запрашивает у пользователя числовые данные, вызывает методы проверки и возвращает корректное значение
+        {
+            string consint;
+            int corrint;
+            do
+            {
+                WriteInColor(msgtext, false, 15);
+                Console.ForegroundColor = ConsoleColor.Gray;
+                var input = Console.ReadLine();
+                consint = string.IsNullOrWhiteSpace(input) ? string.Empty : input;
+            } while (ChekForNumeric(consint, out corrint) == false);
+            return corrint;
         }
         static string[] FillArray(int num, string msgtext)
+        //метод заполняет и возвращает массивы для кличек питомцев и любимых цветов
+        //вызывает метод запроса строчных данных у пользователя
         {
-            
             string[] arr = new string[num];
-            string result;
-            string utext;
+            int number;
 
             for (int i = 0; i < arr.Length; i++)
             {
-                do
-                {
-                    Console.WriteLine(msgtext, i + 1);
-                    result = Console.ReadLine();
-                } while (ChekUserText(result, out utext) == false);
-                arr[i] = utext;
+                number = i + 1;
+                arr[i] = TextQuestion(Convert.ToString(msgtext + number + ": "));
             }
-                        
+
             return arr;
         }
 
         static bool ChekUserText(string userenter, out string corrtext)
+        //мтод проверяет корректность заполнения строковых данных вызывает также метод проверки на числовое значение
         {
-            
+
             if ((ChekForNumeric(userenter, out int corrnum2) == false) & (userenter.Length >= 2))
             {
                 corrtext = userenter;
@@ -143,6 +160,8 @@ namespace Module_5_Tasks
 
         }
         static bool ChekForNumeric(string userenter, out int corrnumeric)
+        //метод проеряет корректность заполнения числовых данных
+        //метод Console.Beep(1000, 300) можно раскоментировать если код выполняется на платформе Windows
         {
             if (int.TryParse(userenter, out int intnum))
             {
@@ -153,16 +172,18 @@ namespace Module_5_Tasks
                 }
                 else
                 {
+                    // Console.Beep(1000, 300);
                     corrnumeric = 0;
                     return false;
                 }
             }
             else
             {
+                // Console.Beep(1000, 300);
                 corrnumeric = 0;
                 return false;
             }
-            
+
         }
 
 
